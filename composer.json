@@ -1,0 +1,23 @@
+{
+    "name": "tamiroh/php-dataclass",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Tamiroh\\PhpDataclass\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tamiroh\\PhpDataclass\\Test\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "tamiroh"
+        }
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    }
+}
