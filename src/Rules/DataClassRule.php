@@ -4,6 +4,7 @@ namespace Tamiroh\PhpDataclass\Rules;
 
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
+use PHPStan\Reflection\MissingPropertyFromReflectionException;
 use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Rules\Rule;
 use ReflectionClass;
@@ -32,6 +33,7 @@ class DataClassRule implements Rule
     /**
      * @inheritDoc
      * @throws ReflectionException
+     * @throws MissingPropertyFromReflectionException
      */
     public function processNode(Node $node, Scope $scope): array
     {
@@ -90,6 +92,16 @@ class DataClassRule implements Rule
             return [
                 'Data class argument names must match with class properties',
             ];
+        }
+
+        $classReflection = $this->reflectionProvider->getClass($class->toString());
+        foreach ($argValueTypes as $argName => $type) {
+            $classPropertyType = $classReflection->getProperty($argName, $scope)->getReadableType();
+            if ($classPropertyType->accepts($type, true)->no()) {
+                return [
+                    "Data class argument type mismatch for $argName",
+                ];
+            }
         }
 
         return [];
