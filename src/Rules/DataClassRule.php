@@ -4,7 +4,11 @@ namespace Tamiroh\PhpDataclass\Rules;
 
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
+use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Rules\Rule;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionProperty;
 use Tamiroh\PhpDataclass\Data;
 
 /**
@@ -12,12 +16,23 @@ use Tamiroh\PhpDataclass\Data;
  */
 class DataClassRule implements Rule
 {
+    private ReflectionProvider $reflectionProvider;
+
+    public function __construct(
+        ReflectionProvider $reflectionProvider
+    ) {
+        $this->reflectionProvider = $reflectionProvider;
+    }
 
     public function getNodeType(): string
     {
         return Node\Expr\New_::class;
     }
 
+    /**
+     * @inheritDoc
+     * @throws ReflectionException
+     */
     public function processNode(Node $node, Scope $scope): array
     {
         $class = $node->class;
@@ -55,7 +70,27 @@ class DataClassRule implements Rule
             $argValueTypes[$key->value] = $scope->getType($value);
         }
 
-        var_dump($argValueTypes);
+        $reflectionProperties = (new ReflectionClass($class->toString()))->getProperties(ReflectionProperty::IS_PUBLIC);
+        $nonNullReflectionProperties = array_filter(
+            $reflectionProperties,
+            fn (ReflectionProperty $property) => !$property->getType()?->allowsNull(),
+        );
+        $nonNullAndUninitializedReflectionProperties = array_filter(
+            $nonNullReflectionProperties,
+            fn (ReflectionProperty $property) => !$property->hasDefaultValue(),
+        );
+        $nonNullAndUninitializedReflectionPropertyNames = array_map(
+            fn (ReflectionProperty $property) => $property->getName(),
+            $nonNullAndUninitializedReflectionProperties,
+        );
+
+        $propertyNameDiff = count(array_diff($nonNullAndUninitializedReflectionPropertyNames, array_keys($argValueTypes)));
+
+        if ($propertyNameDiff !== 0) {
+            return [
+                'Data class argument names must match with class properties',
+            ];
+        }
 
         return [];
     }
