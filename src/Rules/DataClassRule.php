@@ -20,7 +20,8 @@ class DataClassRule implements Rule
 
     public function processNode(Node $node, Scope $scope): array
     {
-        $parentClass = get_parent_class($node->class->toString());
+        $class = $node->class;
+        $parentClass = get_parent_class($class->toString());
 
         if ($parentClass !== Data::class) {
             return [];
@@ -42,7 +43,7 @@ class DataClassRule implements Rule
             ];
         }
 
-        $values = [];
+        $argValueTypes = [];
         foreach ($argValue->items as $item) {
             $key = $item?->key;
             $value = $item?->value;
@@ -51,10 +52,10 @@ class DataClassRule implements Rule
                     'Data class argument must be array with string key',
                 ];
             }
-            $values[$key->value] = $scope->getType($value)->accepts(new \PHPStan\Type\NullType(), true);
+            $argValueTypes[$key->value] = $scope->getType($value);
         }
 
-        var_dump($values);
+        var_dump($argValueTypes);
 
         return [];
     }
