@@ -96,7 +96,7 @@ class DataClassRule implements Rule
 
         $classReflection = $this->reflectionProvider->getClass($class->toString());
         foreach ($argValueTypes as $argName => $type) {
-            $classPropertyType = $classReflection->getProperty($argName, $scope)->getReadableType();
+            $classPropertyType = $classReflection->getProperty($argName, $scope)->getWritableType();
             if ($classPropertyType->accepts($type, true)->no()) {
                 return [
                     "Data class argument type mismatch for $argName",
