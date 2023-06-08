@@ -5,6 +5,7 @@ namespace Tamiroh\PhpDataclass\Rules;
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
+use Tamiroh\PhpDataclass\Data;
 
 /**
  * @implements Rule<Node\Expr\New_>
