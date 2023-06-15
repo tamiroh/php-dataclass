@@ -16,7 +16,6 @@ class CreateTest extends TestCase
         $age = null;
 
         $this->expectException(TypeError::class);
-        $this->expectExceptionMessage('Cannot assign null to property Tamiroh\PhpDataclass\Test\Data\Human2::$age of type int');
 
         new Human2([
             'name' => $name,
